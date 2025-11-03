@@ -5,7 +5,6 @@
 package ro.umfst.vizsga;
 
 import javax.swing.*;
-import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
 import java.sql.*;
@@ -17,7 +16,24 @@ import com.fasterxml.jackson.databind.*;
  */
 public class Vizsga {
 
-    public static void main(String[] args) {
-        System.out.println("Hello World!");
+   public static void main(String[] args) {
+
+        Thread SetupThread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                List<JsonStructure.Intake> intakes = JsonReader.getIntakeList();
+                JsonWriter.writeIntakesToFile(intakes,"C:\\Users\\Laptop\\Documents\\NetBeansProjects\\vizsga\\Output.txt");    
+                
+                
+                SwingUtilities.invokeLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        new VizsgaFrame();
+                        System.out.println("Gui started");
+                    }
+                });
+            }
+        });
+        SetupThread.start();
     }
 }
