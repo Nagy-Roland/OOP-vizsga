@@ -21,19 +21,33 @@ public class JsonReader {
     
     public static List<JsonStructure.Intake> getIntakeList() {
     ObjectMapper objectMapper = new ObjectMapper();
-    try {
+    List<JsonStructure.Intake> validIntakes = new ArrayList<>();
+
+    try (InputStream input = JsonReader.class.getResourceAsStream("/VizsgaJson.json")) {
+
         
-        InputStream input = JsonReader.class.getResourceAsStream("/VizsgaJson.json");
-        JsonStructure data = objectMapper.readValue(input, JsonStructure.class);
-        return data.getIntakes(); 
-    } catch (InvalidFormatException e){
-        e.printStackTrace();
-        return new ArrayList<>();
-    
+        Map<?, ?> root = objectMapper.readValue(input, Map.class);
+        List<?> intakesRaw = (List<?>) root.get("intakes");
+
+        if (intakesRaw != null) {
+            for (Object rawObj : intakesRaw) {
+                try {
+                   
+                    String intakeJson = objectMapper.writeValueAsString(rawObj);
+                    JsonStructure.Intake intake = objectMapper.readValue(intakeJson, JsonStructure.Intake.class);
+                    validIntakes.add(intake);
+                } catch (Exception e) {
+                    System.out.println("Skipping invalid intake: " + rawObj);
+                }
+            }
+        }
+
     } catch (IOException e) {
         e.printStackTrace();
-        return new ArrayList<>(); 
     }
+
+    return validIntakes;
 }
+
 }
 
